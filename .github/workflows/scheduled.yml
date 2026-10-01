@@ -1,0 +1,27 @@
+name: scheduled-loop
+on:
+  schedule:
+    # Discovery fan-out every 6 hours (free-tier friendly; tighten after D1 sizing).
+    - cron: "0 */6 * * *"
+    # Daily maintenance + reminders.
+    - cron: "30 2 * * *"
+  workflow_dispatch:
+
+jobs:
+  loop:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm run typecheck
+      # Dry-run by default. Set LOOP_LIVE=true + notification secrets to go live.
+      - name: automation loop
+        env:
+          DRY_RUN: ${{ vars.LOOP_DRY_RUN || 'true' }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHANNEL_ID: ${{ vars.TELEGRAM_CHANNEL_ID }}
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: npm run loop -- ${{ vars.LOOP_LIVE == 'true' && '--live' || '' }} --verify-limit 10 --link-limit 50

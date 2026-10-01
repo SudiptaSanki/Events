@@ -1,0 +1,32 @@
+name: security
+on:
+  push:
+  pull_request:
+
+jobs:
+  secret-scan:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      # Dependency-free secret scan: fail on committed credential patterns.
+      # (_scans tracked source only — .env files are gitignored._)
+      - name: scan for committed secrets
+        run: |
+          set -e
+          ! grep -rEn --exclude-dir=node_modules --exclude-dir=dist --exclude='package-lock.json' \
+            -e 'bot[0-9]+:[A-Za-z0-9_-]{20,}' \
+            -e 'xox[bap]-[A-Za-z0-9-]+' \
+            -e 'gh[pousr]_[A-Za-z0-9]+' \
+            -e 'AIza[0-9A-Za-z_-]{20,}' \
+            -e 'EAA[A-Za-z0-9]{20,}' \
+            -e '-----BEGIN [A-Z ]*PRIVATE KEY-----' \
+            -e 'discord\.com/api/webhooks/[0-9]+/[A-Za-z0-9_-]+' \
+            . && echo "no committed secrets detected"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run build
+      - name: adversarial + security test suites
+        run: node --no-warnings --test dist/tests/sanitize.test.js dist/tests/linkVerification.test.js dist/tests/pipeline.test.js dist/tests/resolve.test.js dist/tests/verifyDiscovered.test.js dist/tests/threatIntel.test.js dist/tests/adversarial.test.js dist/tests/whatsapp.test.js

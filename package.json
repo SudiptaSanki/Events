@@ -1,0 +1,30 @@
+{
+  "name": "india-hackathon-intel",
+  "version": "0.1.0",
+  "private": true,
+  "description": "India Hackathon & Tech Event Intelligence System — Phase 1 Foundation (verification-first, Cloudflare Workers + D1, local SQLite dev mode)",
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json && node --input-type=module -e \"import {cpSync,mkdirSync} from 'node:fs';mkdirSync('dist/src/db',{recursive:true});cpSync('src/db/schema.sql','dist/src/db/schema.sql');console.log('assets copied')\"",
+    "typecheck": "tsc --noEmit",
+    "test": "npm run build && node --no-warnings --test dist/tests/*.test.js",
+    "test:verbose": "npm run build && node --no-warnings --test --test-reporter=spec dist/tests/*.test.js",
+    "db:migrate": "node --no-warnings dist/scripts/migrate.js",
+    "db:seed": "node --no-warnings dist/scripts/seedSources.js",
+    "db:reset": "node --no-warnings dist/scripts/devReset.js",
+    "discover": "node --no-warnings dist/scripts/discover.js",
+    "verify": "node --no-warnings dist/scripts/verify.js",
+    "maintain": "node --no-warnings dist/scripts/maintenance.js",
+    "loop": "node --no-warnings dist/scripts/runLoop.js",
+    "admin": "node --no-warnings dist/scripts/admin.js",
+    "notify": "node --no-warnings dist/scripts/notify.js",
+    "dry-run": "node --no-warnings dist/scripts/dryRun.js"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.3",
+    "typescript": "^5.6.3"
+  }
+}

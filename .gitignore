@@ -1,0 +1,12 @@
+node_modules/
+dist/
+data/*.sqlite*
+data/*.db*
+.dev.vars
+.env
+.env*.local
+.wrangler/
+coverage/
+*.log
+.DS_Store
+Thumbs.db

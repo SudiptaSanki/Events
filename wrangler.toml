@@ -1,0 +1,28 @@
+#:schema main
+name = "india-hackathon-intel"
+main = "src/worker.ts"
+compatibility_date = "2026-09-01"
+
+# D1 database setup runbook:
+#   1. wrangler d1 create india-events        # copy the database_id below
+#   2. wrangler d1 execute india-events --file=src/db/schema.sql
+#      (use --remote for production; --local for miniflare dev)
+#   3. wrangler secret put TELEGRAM_BOT_TOKEN # only when going live
+#   4. Set DRY_RUN = "false" in [vars] only after verification passes on
+#      real data and channel credentials are provisioned.
+# [[d1_databases]]
+# binding = "DB"
+# database_name = "india-events"
+# database_id = "REPLACE_ME"
+
+[vars]
+DRY_RUN = "true"
+VERIFY_LIMIT = "10"
+LINK_LIMIT = "50"
+
+# Cron triggers: keep <= 5 on Free plan.
+# "*/30 * * * *" (any non-maintenance cron) = standard loop
+#   (discovery + verification + notify).
+# "0 2 * * *" = maintenance loop (link health + reminders + expiry + notify).
+[triggers]
+crons = ["*/30 * * * *", "0 2 * * *"]
